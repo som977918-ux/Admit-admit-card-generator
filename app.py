@@ -72,16 +72,16 @@ SUBJECTS = {
 
 with tab1:
     name = st.text_input("Full Name")
-    father name = st.text_input("Father Name")
+    name = st.text_input("Father Name")
     std = st.text_input("class")
     roll = st.text_input("Roll No")
     dob = st.text_input("DOB (DD/MM/YYYY)")
     center = st.text_input("Exam Center")
     if st.button("Generate PDF"):
-        if not all([name, father name, std, roll, dob, center]):
+        if not all([name, name, std, roll, dob, center]):
             st.error("Please fill all fields")
         else: 
-            pdf = generate_pdf(name, father name, std, roll, dob, center, SUBJECTS)
+            pdf = generate_pdf(name, name, std, roll, dob, center, SUBJECTS)
             st.download_button("Download", pdf, f"{name}_admit.pdf", "application/pdf")
 
 with tab2:
