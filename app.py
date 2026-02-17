@@ -78,10 +78,10 @@ with tab1:
     dob = st.text_input("DOB (DD/MM/YYYY)")
     center = st.text_input("Exam Center")
     if st.button("Generate PDF"):
-        if not all([name, father name, class, roll, dob, center]):
+        if not all([name, fathername, class, roll, dob, center]):
             st.error("Please fill all fields")
         else:
-            pdf = generate_pdf(name, father name, class, roll, dob, center, SUBJECTS)
+            pdf = generate_pdf(name, fathername, class, roll, dob, center, SUBJECTS)
             st.download_button("Download", pdf, f"{name}_admit.pdf", "application/pdf")
 
 with tab2:
