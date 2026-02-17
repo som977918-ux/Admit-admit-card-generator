@@ -1,5 +1,5 @@
 import streamlit as st
-from fpdf2 import FPDF  # Changed to fpdf2
+from fpdf import FPDF  # Back to fpdf
 import pandas as pd
 from io import BytesIO
 import zipfile
@@ -49,7 +49,7 @@ def generate_pdf(name, roll, dob, center, subjects):
     pdf.ln(10)
     pdf.set_font("Arial", 'I', 9)
     pdf.cell(0, 10, "Computer Generated Admit Card", align='C')
-    return pdf.output()  # Now directly returns bytes, no dest='S' or encode
+    return pdf.output(dest='S').encode('latin-1')  # Back to fpdf compatible output
 
 st.set_page_config(page_title="Admit Card", page_icon="🎓")
 st.title("🎓 Smart Admit Card Generator 2026")
@@ -88,4 +88,4 @@ with tab2:
             zip_buf.seek(0)
             st.download_button("Download ZIP", zip_buf.getvalue(), "admit_cards.zip", "application/zip")
 
-st.caption("Made with ❤️ using Streamlit + fpdf2")
+st.caption("Made with ❤️ using Streamlit + fpdf")
