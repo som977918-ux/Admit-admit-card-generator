@@ -1,13 +1,13 @@
 import streamlit as st
-from fpdf import FPDF  # Use fpdf (stable version)
+from fpdf import FPDF
 import pandas as pd
 from io import BytesIO
 import zipfile
-from PIL import Image  # For handling images
+from PIL import Image  # For image handling
 
 class AdmitCard(FPDF):
     def header(self):
-        self.rect(5, 5, 200, 140)
+        self.rect(5, 5, 200, 150)  # Height badhaya photo ke liye
         self.set_font("Arial", 'B', 16)
         self.cell(0, 10, "BOARD OF SECONDARY EDUCATION", ln=True, align='C')
         self.set_font("Arial", 'I', 11)
@@ -20,40 +20,51 @@ def generate_pdf(name, father_name, class_name, roll, dob, center, subjects, pho
     pdf = AdmitCard()
     pdf.add_page()
     
-    # Photo placement (if provided)
+    # Student Photo (right top corner)
     if photo_bytes:
         try:
-            img = Image.open(BytesIO(photo_bytes))
-            pdf.image(BytesIO(photo_bytes), x=150, y=20, w=30, h=40)  # Adjust position/size as needed
-        except:
-            pass  # Skip if image invalid
+            # Validate image
+            Image.open(BytesIO(photo_bytes))
+            # Add to PDF
+            pdf.image(BytesIO(photo_bytes), x=155, y=25, w=35, h=45, type='JPG')  # Position adjust kiya better visibility ke liye
+        except Exception as e:
+            st.warning(f"Photo add karne mein issue: {e}")  # Debug for Streamlit
+            pass
     
+    # Student Details (left side)
+    pdf.set_xy(10, 50)  # Details ko neeche shift kiya photo space ke liye
     pdf.set_font("Arial", 'B', 12)
-    pdf.cell(50, 10, "Student Name :", 0)
+    pdf.cell(60, 10, "Student Name :", 0)
     pdf.set_font("Arial", '', 12)
     pdf.cell(0, 10, name, 0, 1)
+    
     pdf.set_font("Arial", 'B', 12)
-    pdf.cell(50, 10, "Father's Name :", 0)
+    pdf.cell(60, 10, "Father's Name :", 0)
     pdf.set_font("Arial", '', 12)
     pdf.cell(0, 10, father_name, 0, 1)
+    
     pdf.set_font("Arial", 'B', 12)
-    pdf.cell(50, 10, "Class :", 0)
+    pdf.cell(60, 10, "Class :", 0)
     pdf.set_font("Arial", '', 12)
     pdf.cell(0, 10, class_name, 0, 1)
+    
     pdf.set_font("Arial", 'B', 12)
-    pdf.cell(50, 10, "Roll Number :", 0)
+    pdf.cell(60, 10, "Roll Number :", 0)
     pdf.set_font("Arial", '', 12)
     pdf.cell(0, 10, str(roll), 0, 1)
+    
     pdf.set_font("Arial", 'B', 12)
-    pdf.cell(50, 10, "Date of Birth :", 0)
+    pdf.cell(60, 10, "Date of Birth :", 0)
     pdf.set_font("Arial", '', 12)
     pdf.cell(0, 10, dob, 0, 1)
+    
     pdf.set_font("Arial", 'B', 12)
-    pdf.cell(50, 10, "Exam Centre :", 0)
+    pdf.cell(60, 10, "Exam Centre :", 0)
     pdf.set_font("Arial", '', 12)
     pdf.cell(0, 10, center, 0, 1)
     
-    pdf.ln(8)
+    # Subjects Table
+    pdf.ln(10)
     pdf.set_fill_color(0, 102, 204)
     pdf.set_text_color(255, 255, 255)
     pdf.set_font("Arial", 'B', 11)
@@ -64,15 +75,18 @@ def generate_pdf(name, father_name, class_name, roll, dob, center, subjects, pho
     for sub, date in subjects.items():
         pdf.cell(100, 10, sub, 1)
         pdf.cell(90, 10, date, 1, 1)
+    
+    # Footer
     pdf.ln(10)
     pdf.set_font("Arial", 'I', 9)
     pdf.cell(0, 10, "Computer Generated Admit Card", align='C')
-    return pdf.output(dest='S').encode('latin-1')  # fpdf compatible
+    
+    return pdf.output(dest='S').encode('latin-1')
 
-st.set_page_config(page_title="Admit Card", page_icon="🎓")
+st.set_page_config(page_title="Admit Card Generator", page_icon="🎓")
 st.title("🎓 Smart Admit Card Generator 2026")
 
-tab1, tab2 = st.tabs(["Single", "Bulk"])
+tab1, tab2 = st.tabs(["Single Student", "Bulk Upload"])
 
 SUBJECTS = {
     "Mathematics": "20 Mar 2026", "Science": "22 Mar 2026",
@@ -87,36 +101,34 @@ with tab1:
     roll = st.text_input("Roll No")
     dob = st.text_input("DOB (DD/MM/YYYY)")
     center = st.text_input("Exam Center")
-    photo = st.file_uploader("Upload Student Photo (optional)", type=["jpg", "jpeg", "png"])
+    photo = st.file_uploader("Upload Student Photo (JPG/PNG, optional)", type=["jpg", "jpeg", "png"])
     photo_bytes = photo.read() if photo else None
+    
     if st.button("Generate PDF"):
         if not all([name, father_name, class_name, roll, dob, center]):
             st.error("Please fill all required fields")
         else:
-            pdf = generate_pdf(name, father_name, class_name, roll, dob, center, SUBJECTS, photo_bytes)
-            st.download_button("Download", pdf, f"{name}_admit.pdf", "application/pdf")
+            pdf_bytes = generate_pdf(name, father_name, class_name, roll, dob, center, SUBJECTS, photo_bytes)
+            st.download_button("⬇️ Download PDF", pdf_bytes, f"{name}_admit_card.pdf", "application/pdf")
 
 with tab2:
-    st.info("Upload Excel/CSV with columns: Name, Father's Name, Class, Roll, DOB, Center. Photo upload not supported for bulk yet.")
-    file = st.file_uploader("Excel/CSV Upload", type=["xlsx","csv"])
+    st.info("Upload Excel/CSV with columns: Name, Father's Name, Class, Roll, DOB, Center. (Photo not supported for bulk)")
+    file = st.file_uploader("Upload File", type=["xlsx", "csv"])
     if file:
         df = pd.read_excel(file) if file.name.endswith('xlsx') else pd.read_csv(file)
-        st.dataframe(df)
+        st.dataframe(df.head())
         if st.button("Generate All PDFs (ZIP)"):
             zip_buf = BytesIO()
             with zipfile.ZipFile(zip_buf, "w") as z:
                 for _, r in df.iterrows():
-                    p = generate_pdf(
-                        r.get('Name',''), 
-                        r.get("Father's Name",''),
-                        r.get('Class',''),
-                        r.get('Roll',''), 
-                        r.get('DOB',''), 
-                        r.get('Center',''), 
+                    pdf_bytes = generate_pdf(
+                        r.get('Name', ''), r.get("Father's Name", ''),
+                        r.get('Class', ''), r.get('Roll', ''),
+                        r.get('DOB', ''), r.get('Center', ''),
                         SUBJECTS
                     )
-                    z.writestr(f"{r.get('Name','')}_{r.get('Roll','')}.pdf", p)
+                    z.writestr(f"{r.get('Name','')}_{r.get('Roll','')}.pdf", pdf_bytes)
             zip_buf.seek(0)
-            st.download_button("Download ZIP", zip_buf.getvalue(), "admit_cards.zip", "application/zip")
+            st.download_button("⬇️ Download ZIP", zip_buf.getvalue(), "all_admit_cards.zip", "application/zip")
 
 st.caption("Made with ❤️ using Streamlit + fpdf")
