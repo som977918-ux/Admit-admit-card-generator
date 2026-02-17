@@ -81,7 +81,7 @@ with tab1:
         if not all([name, name, std, roll, dob, center]):
             st.error("Please fill all fields")
         else: 
-            pdf = generate_pdf(name, father name, std, roll, dob, center, SUBJECTS)
+            pdf = generate_pdf(name, father, name, std, roll, dob, center, SUBJECTS)
             st.download_button("Download", pdf, f"{name}_admit.pdf", "application/pdf")
 
 with tab2:
