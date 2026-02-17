@@ -29,7 +29,7 @@ def generate_pdf(name, roll, dob, center, subjects):
     pdf.set_font("Arial", 'B', 12)
     pdf.cell(50, 10, "Class :", 0)
     pdf.set_font("Arial", '', 12)
-    pdf.cell(0, 10, str(class), 0, 1)
+    pdf.cell(0, 10, str(roll), 0, 1)
     pdf.set_font("Arial", 'B', 12)
     pdf.cell(50, 10, "Roll Number :", 0)
     pdf.set_font("Arial", '', 12)
