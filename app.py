@@ -29,7 +29,7 @@ def generate_pdf(name, roll, dob, center, subjects):
     pdf.set_font("Arial", 'B', 12)
     pdf.cell(50, 10, "Class :", 0)
     pdf.set_font("Arial", '', 12)
-    pdf.cell(0, 10, str(roll), 0, 1)
+    pdf.cell(0, 10, str(std), 0, 1)
     pdf.set_font("Arial", 'B', 12)
     pdf.cell(50, 10, "Roll Number :", 0)
     pdf.set_font("Arial", '', 12)
@@ -78,10 +78,10 @@ with tab1:
     dob = st.text_input("DOB (DD/MM/YYYY)")
     center = st.text_input("Exam Center")
     if st.button("Generate PDF"):
-        if not all([name, father name, clas, roll, dob, center]):
+        if not all([name, fathername, std, roll, dob, center]):
             st.error("Please fill all fields")
-        else:
-            pdf = generate_pdf(name, father name, clas, roll, dob, center, SUBJECTS)
+        else
+            pdf = generate_pdf(name, fathername, std, roll, dob, center, SUBJECTS)
             st.download_button("Download", pdf, f"{name}_admit.pdf", "application/pdf")
 
 with tab2:
