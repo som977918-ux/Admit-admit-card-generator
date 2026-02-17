@@ -23,12 +23,17 @@ def generate_pdf(name, father_name, class_name, roll, dob, center, subjects, pho
     # Student Photo (right top corner)
     if photo_bytes:
         try:
-            # Validate image
-            Image.open(BytesIO(photo_bytes))
-            # Add to PDF
-            pdf.image(BytesIO(photo_bytes), x=155, y=25, w=35, h=45, type='JPG')  # Position adjust kiya better visibility ke liye
+            # Open image with PIL
+            img = Image.open(BytesIO(photo_bytes))
+            img = img.convert('RGB')  # Convert to RGB for JPEG
+            jpg_buffer = BytesIO()
+            img.save(jpg_buffer, format='JPEG')
+            jpg_bytes = jpg_buffer.getvalue()
+            
+            # Add to PDF as JPEG bytes
+            pdf.image(jpg_bytes, x=155, y=25, w=35, h=45, type='JPEG')
         except Exception as e:
-            st.warning(f"Photo add karne mein issue: {e}")  # Debug for Streamlit
+            st.warning(f"Photo add karne mein issue: {e}")
             pass
     
     # Student Details (left side)
