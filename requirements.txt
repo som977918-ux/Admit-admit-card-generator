@@ -2,3 +2,4 @@ streamlit
 fpdf
 pandas
 openpyxl
+pillow  # Yeh naya add kiya - image ke liye zaroori
