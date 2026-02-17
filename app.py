@@ -72,8 +72,8 @@ SUBJECTS = {
 
 with tab1:
     name = st.text_input("Full Name")
-    name = st.text_input("Father Name")
-    roll = st.text_input("class")
+    father name = st.text_input("Father Name")
+    std = st.text_input("class")
     roll = st.text_input("Roll No")
     dob = st.text_input("DOB (DD/MM/YYYY)")
     center = st.text_input("Exam Center")
