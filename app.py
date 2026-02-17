@@ -1,5 +1,5 @@
 import streamlit as st
-from fpdf import FPDF
+from fpdf2 import FPDF  # Changed to fpdf2
 import pandas as pd
 from io import BytesIO
 import zipfile
@@ -22,23 +22,34 @@ def generate_pdf(name, roll, dob, center, subjects):
     pdf.cell(50, 10, "Student Name :", 0)
     pdf.set_font("Arial", '', 12)
     pdf.cell(0, 10, name, 0, 1)
-    pdf.cell(50, 10, "Roll Number :", 0); pdf.cell(0, 10, str(roll), 0, 1)
-    pdf.cell(50, 10, "Date of Birth :", 0); pdf.cell(0, 10, dob, 0, 1)
-    pdf.cell(50, 10, "Exam Centre :", 0); pdf.cell(0, 10, center, 0, 1)
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(50, 10, "Roll Number :", 0)
+    pdf.set_font("Arial", '', 12)
+    pdf.cell(0, 10, str(roll), 0, 1)
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(50, 10, "Date of Birth :", 0)
+    pdf.set_font("Arial", '', 12)
+    pdf.cell(0, 10, dob, 0, 1)
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(50, 10, "Exam Centre :", 0)
+    pdf.set_font("Arial", '', 12)
+    pdf.cell(0, 10, center, 0, 1)
     
     pdf.ln(8)
     pdf.set_fill_color(0, 102, 204)
     pdf.set_text_color(255, 255, 255)
+    pdf.set_font("Arial", 'B', 11)
     pdf.cell(100, 10, "Subject", 1, 0, 'C', True)
     pdf.cell(90, 10, "Date", 1, 1, 'C', True)
     pdf.set_text_color(0, 0, 0)
+    pdf.set_font("Arial", '', 11)
     for sub, date in subjects.items():
         pdf.cell(100, 10, sub, 1)
         pdf.cell(90, 10, date, 1, 1)
     pdf.ln(10)
     pdf.set_font("Arial", 'I', 9)
     pdf.cell(0, 10, "Computer Generated Admit Card", align='C')
-    return pdf.output(dest='S').encode('latin-1')
+    return pdf.output()  # Now directly returns bytes, no dest='S' or encode
 
 st.set_page_config(page_title="Admit Card", page_icon="🎓")
 st.title("🎓 Smart Admit Card Generator 2026")
@@ -57,8 +68,11 @@ with tab1:
     dob = st.text_input("DOB (DD/MM/YYYY)")
     center = st.text_input("Exam Center")
     if st.button("Generate PDF"):
-        pdf = generate_pdf(name, roll, dob, center, SUBJECTS)
-        st.download_button("Download", pdf, f"{name}_admit.pdf", "application/pdf")
+        if not all([name, roll, dob, center]):
+            st.error("Please fill all fields")
+        else:
+            pdf = generate_pdf(name, roll, dob, center, SUBJECTS)
+            st.download_button("Download", pdf, f"{name}_admit.pdf", "application/pdf")
 
 with tab2:
     file = st.file_uploader("Excel/CSV Upload", type=["xlsx","csv"])
@@ -71,4 +85,7 @@ with tab2:
                 for _, r in df.iterrows():
                     p = generate_pdf(r.get('Name',''), r.get('Roll',''), r.get('DOB',''), r.get('Center',''), SUBJECTS)
                     z.writestr(f"{r.get('Name','')}_{r.get('Roll','')}.pdf", p)
+            zip_buf.seek(0)
             st.download_button("Download ZIP", zip_buf.getvalue(), "admit_cards.zip", "application/zip")
+
+st.caption("Made with ❤️ using Streamlit + fpdf2")
